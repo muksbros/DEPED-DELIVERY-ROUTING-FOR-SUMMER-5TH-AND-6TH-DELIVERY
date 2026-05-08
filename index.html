@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Feeding Program 2026 — Delivery Checklist</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+  :root {
+    --c-bg:#f5f2eb;--c-paper:#fffef9;--c-t1:#1a4a2e;--c-t1-mid:#2d7a4f;
+    --c-t2:#1a3560;--c-t2-mid:#2d5fa8;--c-t3:#5a1a1a;--c-t3-mid:#a83030;
+    --c-text:#1c1c1c;--c-muted:#6b6b6b;--c-border:#d8d4c8;--radius:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Barlow',sans-serif;background:var(--c-bg);color:var(--c-text);min-height:100vh;padding:0 0 60px;}
+
+  /* TABS */
+  .tab-nav{display:flex;background:#111;border-bottom:3px solid #f5c842;position:sticky;top:0;z-index:200;overflow-x:auto;}
+  .tab-btn{flex:1;min-width:200px;padding:16px 24px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;
+    letter-spacing:.06em;text-transform:uppercase;color:#777;border:none;background:none;cursor:pointer;
+    border-bottom:4px solid transparent;transition:all .2s;text-align:center;}
+  .tab-btn:hover{color:#ccc;}
+  .tab-btn.active{color:#f5c842;border-bottom-color:#f5c842;}
+  .tab-btn.double-tab.active{color:#e8731a;border-bottom-color:#e8731a;}
+  .tab-tag{display:inline-block;background:rgba(245,200,66,.15);border:1px solid rgba(245,200,66,.3);
+    border-radius:3px;padding:2px 8px;font-size:10px;margin-left:6px;vertical-align:middle;color:#f5c842;}
+  .tab-btn.double-tab .tab-tag{background:rgba(232,115,26,.15);border-color:rgba(232,115,26,.3);color:#e8731a;}
+
+  .tab-page{display:none;}
+  .tab-page.active{display:block;}
+
+  /* HEADER */
+  .page-header{background:#1c1c1c;color:#fff;padding:22px 24px 18px;}
+  .page-header.summer{border-bottom:4px solid #f5c842;}
+  .page-header.double{border-bottom:4px solid #e8731a;}
+  .page-header h1{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;}
+  .page-header .sub{font-size:12px;color:#aaa;margin-top:4px;letter-spacing:.08em;text-transform:uppercase;}
+  .header-meta{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap;}
+  .meta-chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:4px;padding:5px 12px;
+    font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;}
+  .meta-chip span{color:#f5c842;}
+  .meta-chip.orange span{color:#f59a42;}
+
+  /* DEPOT NOTE */
+  .depot-note{background:#fffbea;border-left:3px solid #f5c842;padding:8px 18px;font-size:12px;color:#555;}
+  .depot-note.orange{background:#fff5ea;border-left-color:#e8731a;}
+  .depot-note strong{color:#1c1c1c;}
+
+  /* LEGEND */
+  .route-legend{display:flex;gap:8px;flex-wrap:wrap;padding:14px 20px;background:var(--c-paper);
+    border-bottom:1px solid var(--c-border);align-items:center;}
+  .route-legend .rl-label{font-size:11px;color:var(--c-muted);text-transform:uppercase;letter-spacing:.08em;margin-right:4px;}
+  .route-pill{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.05em;cursor:pointer;transition:opacity .15s;border:none;}
+  .route-pill:hover{opacity:.75;}
+  .route-pill.t1{background:var(--c-t1);color:#fff;}
+  .route-pill.t2{background:var(--c-t2);color:#fff;}
+  .route-pill.t3{background:var(--c-t3);color:#fff;}
+  .route-pill.all{background:#1c1c1c;color:#fff;}
+
+  /* SUMMARY BAR */
+  .summary-bar{display:flex;overflow-x:auto;border-bottom:1px solid var(--c-border);background:var(--c-paper);}
+  .sum-card{flex:1;min-width:130px;padding:14px 18px;border-right:1px solid var(--c-border);cursor:pointer;transition:background .15s;}
+  .sum-card:last-child{border-right:none;}
+  .sum-card:hover{background:#f0ede3;}
+  .sum-card .label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--c-muted);margin-bottom:4px;}
+  .sum-card .value{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;line-height:1;}
+  .sum-card .sub-val{font-size:11px;color:var(--c-muted);margin-top:3px;}
+  .t1-color{color:var(--c-t1-mid);}
+  .t2-color{color:var(--c-t2-mid);}
+  .t3-color{color:var(--c-t3-mid);}
+
+  /* PROGRESS */
+  .progress-wrap{padding:14px 20px;background:var(--c-paper);border-bottom:1px solid var(--c-border);}
+  .prog-label{font-size:11px;color:var(--c-muted);margin-bottom:6px;display:flex;justify-content:space-between;}
+  .prog-bar{height:6px;background:#ddd;border-radius:3px;overflow:hidden;}
+  .prog-fill{height:100%;border-radius:3px;transition:width .4s;}
+  .prog-fill.summer{background:linear-gradient(90deg,#2d7a4f,#f5c842);}
+  .prog-fill.double{background:linear-gradient(90deg,#c05a10,#f5c842);}
+
+  /* ALLOCATION BOX */
+  .alloc-wrap{padding:12px 20px 0;max-width:1100px;margin:0 auto;}
+  .allocation-box{background:#fff8f0;border:2px solid #e8731a;border-radius:8px;padding:14px 18px;}
+  .allocation-box h3{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;
+    text-transform:uppercase;letter-spacing:.08em;color:#e8731a;margin-bottom:8px;}
+  .alloc-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:13px;}
+  .alloc-num{font-weight:700;font-family:'Barlow Condensed',sans-serif;font-size:18px;}
+  .alloc-label{color:var(--c-muted);font-size:11px;}
+
+  /* CONTENT */
+  .content{padding:20px;max-width:1100px;margin:0 auto;}
+
+  /* TRUCK BLOCKS */
+  .truck-block{margin-bottom:28px;border:2px solid;border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+  .truck-block.t1{border-color:var(--c-t1);}
+  .truck-block.t2{border-color:var(--c-t2);}
+  .truck-block.t3{border-color:var(--c-t3);}
+  .truck-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;gap:10px;}
+  .t1 .truck-header{background:var(--c-t1);color:#fff;}
+  .t2 .truck-header{background:var(--c-t2);color:#fff;}
+  .t3 .truck-header{background:var(--c-t3);color:#fff;}
+  .truck-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .truck-badge{background:rgba(255,255,255,.2);border-radius:4px;padding:3px 10px;font-size:13px;font-weight:600;}
+  .truck-badge.orange{background:rgba(232,115,26,.5);}
+  .truck-stats{font-size:13px;opacity:.85;text-align:right;}
+  .truck-toggle{font-size:18px;transition:transform .2s;}
+  .truck-toggle.open{transform:rotate(180deg);}
+  .truck-body{background:var(--c-paper);}
+
+  /* DROP BLOCKS */
+  .drop-block{border-bottom:1px solid var(--c-border);}
+  .drop-block:last-child{border-bottom:none;}
+  .drop-header{padding:10px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;background:#fafaf6;
+    border-left:4px solid transparent;transition:background .15s;}
+  .t1 .drop-header{border-left-color:var(--c-t1-mid);}
+  .t2 .drop-header{border-left-color:var(--c-t2-mid);}
+  .t3 .drop-header{border-left-color:var(--c-t3-mid);}
+  .drop-header:hover{background:#f0ede5;}
+  .drop-num{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-muted);min-width:56px;}
+  .drop-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;flex:1;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .priority-badge{background:#e8731a;color:#fff;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;border-radius:3px;padding:2px 6px;flex-shrink:0;}
+  .drop-qty{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;}
+  .drop-qty .unit{font-size:11px;font-weight:400;color:var(--c-muted);margin-left:2px;}
+  .drop-check{width:20px;height:20px;border-radius:4px;border:2px solid #bbb;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:13px;}
+  .drop-check.checked{background:#2d7a4f;border-color:#2d7a4f;color:#fff;}
+  .drop-toggle{font-size:14px;color:var(--c-muted);transition:transform .2s;}
+  .drop-toggle.open{transform:rotate(180deg);}
+
+  /* TABLE */
+  .school-table-wrap{padding:0 18px 14px;}
+  .school-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .school-table thead th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--c-muted);font-weight:600;padding:8px 8px 6px;border-bottom:1px solid var(--c-border);}
+  .school-table thead th:not(:first-child){text-align:right;}
+  .school-table tbody tr{border-bottom:1px solid #eeebe3;}
+  .school-table tbody tr:last-child{border-bottom:none;}
+  .school-table tbody tr:hover{background:#f8f5ed;}
+  .school-table tbody td{padding:7px 8px;}
+  .school-table tbody td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums;}
+  .school-table tbody td:first-child{font-weight:500;}
+  .school-table tfoot td{padding:8px;border-top:2px solid var(--c-border);font-weight:700;font-size:13px;text-align:right;}
+  .school-table tfoot td:first-child{text-align:left;text-transform:uppercase;font-size:11px;letter-spacing:.08em;}
+  .box-badge{display:inline-block;background:#e8efe9;color:#2d7a4f;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700;}
+  .box-badge.zero{background:#eee;color:#aaa;}
+  tr.done-row td{color:#aaa;text-decoration:line-through;}
+  .hidden{display:none;}
+
+  @media print{
+    .tab-nav{display:none;}
+    .tab-page{display:block!important;}
+    .summary-bar,.progress-wrap{display:none;}
+    .truck-body,.school-table-wrap{display:block!important;}
+    body{background:#fff;}
+  }
+</style>
+</head>
+<body>
+
+<div class="tab-nav">
+  <button class="tab-btn active" id="tab-summer" onclick="switchTab('summer')">
+    🍱 Summer Feeding
+    <span class="tab-tag">29,873 PCS</span>
+  </button>
+  <button class="tab-btn double-tab" id="tab-double" onclick="switchTab('double')">
+    🚚 5th &amp; 6th Delivery
+    <span class="tab-tag">DELAYED · 82,210 PCS</span>
+  </button>
+</div>
+
+<!-- ══ SUMMER TAB ══ -->
+<div class="tab-page active" id="page-summer">
+  <div class="page-header summer">
+    <div style="max-width:1100px;margin:0 auto;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;">🍱 Summer Feeding Program 2026</div>
+      <div class="sub">Delivery &amp; Box Labeling Plan — Muksan Residence, Talon-Talon (Main Depot)</div>
+      <div class="header-meta">
+        <div class="meta-chip">Box Capacity: <span>200 pcs</span></div>
+        <div class="meta-chip">Routing: <span>Farthest → Nearest</span></div>
+        <div class="meta-chip">Trucks: <span>3</span></div>
+        <div class="meta-chip">Grand Total: <span id="s-grand-display">—</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="depot-note"><strong>Main Depot:</strong> Muksan Residence – Talon-Talon &nbsp;|&nbsp; <strong>Program:</strong> Summer Feeding &nbsp;|&nbsp; <strong>Routing:</strong> Farthest first</div>
+  <div class="route-legend">
+    <span class="rl-label">Filter:</span>
+    <button class="route-pill all" onclick="filterRoute('summer','all')">All Routes</button>
+    <button class="route-pill t1" onclick="filterRoute('summer','t1')">🚛 Truck 1 — West Coast</button>
+    <button class="route-pill t2" onclick="filterRoute('summer','t2')">🚛 Truck 2 — East Coast</button>
+    <button class="route-pill t3" onclick="filterRoute('summer','t3')">🚛 Truck 3 — City</button>
+  </div>
+  <div class="summary-bar">
+    <div class="sum-card" onclick="filterRoute('summer','all')"><div class="label">Grand Total</div><div class="value" style="color:#1c1c1c" id="s-sum-grand">—</div><div class="sub-val" id="s-sum-grand-sub"></div></div>
+    <div class="sum-card" onclick="filterRoute('summer','t1')"><div class="label">Truck 1 · West Coast</div><div class="value t1-color" id="s-sum-t1">—</div><div class="sub-val" id="s-sum-t1-sub"></div></div>
+    <div class="sum-card" onclick="filterRoute('summer','t2')"><div class="label">Truck 2 · East Coast</div><div class="value t2-color" id="s-sum-t2">—</div><div class="sub-val" id="s-sum-t2-sub"></div></div>
+    <div class="sum-card" onclick="filterRoute('summer','t3')"><div class="label">Truck 3 · City Route</div><div class="value t3-color" id="s-sum-t3">—</div><div class="sub-val" id="s-sum-t3-sub"></div></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="prog-label"><span>Delivery Progress</span><span id="s-prog-text">0 / 0 drops completed</span></div>
+    <div class="prog-bar"><div class="prog-fill summer" id="s-prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="content" id="s-main-content"></div>
+</div>
+
+<!-- ══ 5TH & 6TH TAB ══ -->
+<div class="tab-page" id="page-double">
+  <div class="page-header double">
+    <div style="max-width:1100px;margin:0 auto;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;">🚚 5th &amp; 6th Delivery — Delayed Double Run</div>
+      <div class="sub">Muksan Residence, Talon-Talon (Main Depot) · Priority: Farthest Drop-offs First</div>
+      <div class="header-meta">
+        <div class="meta-chip orange">Delivery: <span>5th &amp; 6th</span></div>
+        <div class="meta-chip orange">Status: <span>DELAYED</span></div>
+        <div class="meta-chip orange">Total Crackers: <span id="d-grand-display">—</span></div>
+        <div class="meta-chip orange">Remaining: <span>79,036 pcs</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="depot-note orange">
+    <strong>⚠ Delayed Double Delivery:</strong> 5th &amp; 6th feeding combined. Quantities from official 5th &amp; 6th feeding file (double feeding per school). &nbsp;|&nbsp;
+    <strong>🔴 Priority</strong> = farthest drop-offs from Muksan Residence, Talon-Talon. &nbsp;|&nbsp;
+    <strong>Remaining after partial done delivery:</strong> 79,036 pcs.
+  </div>
+  <div class="alloc-wrap">
+    <div class="allocation-box">
+      <h3>📦 5th &amp; 6th Delivery Overview</h3>
+      <div class="alloc-row">
+        <div><div class="alloc-num" style="color:#e8731a;">82,210</div><div class="alloc-label">Total crackers (double feeding)</div></div>
+        <div><div class="alloc-num" style="color:#888;">3,174</div><div class="alloc-label">Already delivered (done)</div></div>
+        <div><div class="alloc-num" style="color:#2d7a4f;">79,036</div><div class="alloc-label">Remaining to deliver</div></div>
+        <div><div class="alloc-num" style="color:#1c1c1c;">200 pcs</div><div class="alloc-label">Per box capacity</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="route-legend">
+    <span class="rl-label">Filter:</span>
+    <button class="route-pill all" onclick="filterRoute('double','all')">All Routes</button>
+    <button class="route-pill t1" onclick="filterRoute('double','t1')">🚛 Truck 1 — West Coast</button>
+    <button class="route-pill t2" onclick="filterRoute('double','t2')">🚛 Truck 2 — East Coast</button>
+    <button class="route-pill t3" onclick="filterRoute('double','t3')">🚛 Truck 3 — City</button>
+  </div>
+  <div class="summary-bar">
+    <div class="sum-card" onclick="filterRoute('double','all')"><div class="label">Grand Total</div><div class="value" style="color:#1c1c1c" id="d-sum-grand">—</div><div class="sub-val" id="d-sum-grand-sub"></div></div>
+    <div class="sum-card" onclick="filterRoute('double','t1')"><div class="label">Truck 1 · West Coast</div><div class="value t1-color" id="d-sum-t1">—</div><div class="sub-val" id="d-sum-t1-sub"></div></div>
+    <div class="sum-card" onclick="filterRoute('double','t2')"><div class="label">Truck 2 · East Coast</div><div class="value t2-color" id="d-sum-t2">—</div><div class="sub-val" id="d-sum-t2-sub"></div></div>
+    <div class="sum-card" onclick="filterRoute('double','t3')"><div class="label">Truck 3 · City Route</div><div class="value t3-color" id="d-sum-t3">—</div><div class="sub-val" id="d-sum-t3-sub"></div></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="prog-label"><span>5th &amp; 6th Delivery Progress</span><span id="d-prog-text">0 / 0 drops completed</span></div>
+    <div class="prog-bar"><div class="prog-fill double" id="d-prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="content" id="d-main-content"></div>
+</div>
+
+<script>
+// ── TAB SWITCH ──
+function switchTab(w){
+  document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+w).classList.add('active');
+  document.getElementById('tab-'+w).classList.add('active');
+}
+
+// ── SUMMER DATA (original from first HTML) ──
+const SUMMER_TRUCKS=[
+  {id:'t1',label:'Truck 1',route:'West Coast Route',drops:[
+    {name:'Talisayan ES',schools:[{n:'Anuling ES',q:247},{n:'Mt. View ES',q:87},{n:'Pamucutan ES',q:384},{n:'Cadalagan ES',q:220},{n:'Camp Susana ES',q:414},{n:'Datu Panguluhan ES',q:179},{n:'Pole Diutay ES',q:85},{n:'Pole Grande ES',q:26},{n:'San Ramon ES',q:182},{n:'Talisayan ES',q:178}]},
+    {name:'Patalon ES',schools:[{n:'Patalon ES',q:667},{n:'Montecentral PS Extension',q:83},{n:'Sinubong ES',q:280}]},
+    {name:'Labuan CS',schools:[{n:'Campo Uno PS',q:62},{n:'Labuan CS',q:1953},{n:'Latap ES',q:43},{n:'Latap ES – Lacumba Annex',q:42},{n:'Latap ES – Cabonegro Annex',q:54},{n:'Limpapa ES',q:91}]},
+    {name:'Ayala CS',schools:[{n:'Ayala CS',q:559}]},
+    {name:'Recodo ES',schools:[{n:'Recodo ES',q:415},{n:'Recodo NHS',q:0}]},
+    {name:'Cawit ES',schools:[{n:'Baluno ES',q:118},{n:'Cawit ES',q:230},{n:'Lima ES',q:33},{n:'Tulungatung ES',q:560},{n:'Zambame ES',q:16},{n:'Cabigan ES',q:34},{n:'Maasin LC',q:76}]},
+    {name:'Sinunuc ES',schools:[{n:'Sinunuc ES',q:671},{n:'Sto. Niño ES',q:28}]},
+    {name:'Baliwasan CS',schools:[{n:'Baliwasan CS',q:388},{n:'San Jose Gusu ES',q:406},{n:'Southcom ES',q:371},{n:'Capisan ES',q:49},{n:'Malagutay ES',q:45},{n:'Southern Support Comm. ES',q:173},{n:'John Spirig Sr. Memorial ES',q:559}]},
+    {name:'Sta. Maria CS',schools:[{n:'EAAB ES',q:79},{n:'Sta. Maria CS',q:875},{n:'Cabatangan ES',q:136}]},
+    {name:'Catalina Vda. de Jalon MS',schools:[{n:'Catalina Vda. de Jalon MS',q:485}]},
+  ]},
+  {id:'t2',label:'Truck 2',route:'East Coast Route',drops:[
+    {name:'Vitali CS',schools:[{n:'Bincul ES',q:63},{n:'Dr. Manuel Diaz MES',q:99},{n:'Linduman ES',q:28},{n:'Mangusu IS',q:18},{n:'Matiti ES',q:18},{n:'Mulawin ES',q:74},{n:'Sibuktok ES',q:32},{n:'Sibuktok PS Annex',q:27},{n:'Tagpangi ES',q:24},{n:'Sta. Fe Extension',q:10},{n:'Tamion ES',q:11},{n:'Taloptap ES',q:35},{n:'Tindalo ES',q:216},{n:'Vitali CS',q:202}]},
+    {name:'Tictapul ES',schools:[{n:'Bermuda ES',q:9},{n:'Licomo IS',q:45},{n:'Limaong ES',q:36},{n:'Malanta ES',q:80},{n:'Matarling ES',q:14},{n:'Sinoropan ES',q:72},{n:'Talaga ES',q:72},{n:'Tarlago ES',q:46},{n:'Tictapul ES',q:97},{n:'Tigui ES',q:18},{n:'Tumitus ES',q:79}]},
+    {name:'Tagasilay ES',schools:[{n:'Davuy ES',q:70},{n:'Merloquet ES',q:47},{n:'Sibulao ES',q:125},{n:'Tagasilay ES',q:203},{n:'Taguiti ES',q:16},{n:'Tigbalabag ES',q:52}]},
+    {name:'Curuan CS',schools:[{n:'Bagacay ES',q:38},{n:'Camp Pilar ES',q:49},{n:'Cansilayan ES',q:85},{n:'Cristino M. Paragas MES',q:88},{n:'Curuan CS',q:496},{n:'Dita ES',q:63},{n:'Mina ES',q:40},{n:'Lubigan ES',q:31},{n:'Natividad Medalle PES',q:68},{n:'Panubigan ES',q:102},{n:'Sapa Manok ES',q:27},{n:'Sibutat ES',q:25},{n:'Upper Masaba ES',q:18}]},
+    {name:'Buenavista IS',schools:[{n:'Buenavista IS',q:406},{n:'Calabasa ES',q:53},{n:'Latuan ES',q:60},{n:'Marangan ES',q:28},{n:'Muti ES',q:68},{n:'Niyog-Niyog ES',q:66},{n:'Sapa Dulian ES',q:20},{n:'Sapa Moro ES',q:48},{n:'Simanta ES',q:9}]},
+    {name:'Manicahan CS',schools:[{n:'Magsaysay ES',q:147},{n:'Manicahan CS',q:402},{n:'Manicahan Pob. ES',q:495},{n:'Poso ES',q:43},{n:'Victoria ES',q:358}]},
+    {name:'Sangali ES',schools:[{n:'Bolong ES',q:116},{n:'Don FOCS MES',q:40},{n:'Mangga ES',q:58},{n:'Pasilmanta ES',q:300},{n:'Sangali ES',q:243},{n:'Sinunuk ES',q:38},{n:'Siguinan ES',q:73},{n:'Tumalutab ES',q:165}]},
+    {name:'Bunguiao ES',schools:[{n:'Bunguiao ES',q:145},{n:'Camp Socorro ES',q:30},{n:'Dulian ES',q:33},{n:'Eligna ES',q:7},{n:'Nangka ES',q:14},{n:'Sapa Seco ES',q:30},{n:'Shigeru ES',q:54},{n:'Udjung ES',q:14},{n:'Baluno ES',q:24}]},
+    {name:'Mercedes CS',schools:[{n:'Buenakapok ES',q:70},{n:'Imelda ES',q:88},{n:'Lanote ES',q:31},{n:'Lanzones ES',q:51},{n:'Lumbayao ES',q:59},{n:'Mercedes CS',q:439},{n:'Mulu-Muluan ES',q:184},{n:'Pangulayan ES',q:29},{n:'Tolosa ES',q:44}]},
+    {name:'Taluksangay ES',schools:[{n:'Busay ES',q:111},{n:'Landang Laum ES',q:105},{n:'Talabaan ES',q:247},{n:'Taluksangay ES',q:131},{n:'Tuan Datu Hanis',q:42}]},
+    {name:'Culianan LC',schools:[{n:'Cabaluay ES',q:159},{n:'Cabaluay Vida Vista ES',q:21},{n:'Cacao ES',q:43},{n:'Culianan LC',q:223},{n:'Guisao ES',q:72},{n:'Islamia ES',q:58},{n:'Lapakan ES',q:40},{n:'Nangka ES',q:14}]},
+    {name:'Putik CS',schools:[{n:'Divisoria ES',q:243},{n:'Lunzuran ES',q:199},{n:'Putik CS',q:252}]},
+    {name:'Boalan ES',schools:[{n:'Balunu ES',q:76},{n:'Boalan ES',q:444},{n:'Lugakit ES',q:15},{n:'Lumayang ES',q:208},{n:'Lumbangan ES',q:132},{n:'Pasobolong IS',q:217},{n:'Salaan ES',q:56},{n:'Zambowood ES',q:513}]},
+  ]},
+  {id:'t3',label:'Truck 3',route:'City Route',drops:[
+    {name:'Zamboanga CS',schools:[{n:'Canelar IS',q:150},{n:'Zamboanga CS',q:515}]},
+    {name:'Sta. Barbara CS',schools:[{n:'Mariki ES',q:101},{n:'Rio Hondo ES',q:322},{n:'Sta. Barbara CS',q:278}]},
+    {name:'Tetuan CS',schools:[{n:'Guiwan ES',q:92},{n:'Tetuan CS',q:420}]},
+    {name:'DGEMS',schools:[{n:'Bihing Tahik PS',q:130},{n:'DGEMS',q:600}]},
+    {name:'Tugbungan ES',schools:[{n:'Tugbungan ES',q:484}]},
+    {name:'San Roque ES',schools:[{n:'Salum ES',q:143},{n:'San Roque ES',q:602}]},
+    {name:'Pasonanca ES',schools:[{n:'Bandera ES',q:22},{n:'Dulian ES',q:17},{n:'Luyahan ES',q:46},{n:'Muruk ES',q:12},{n:'Pasonanca ES',q:502},{n:'Upper Pasonanca ES',q:128}]},
+    {name:'Talon-Talon ES',schools:[{n:'Talon-Talon ES',q:488},{n:'Landang Gua ES',q:82},{n:'Manalipa IS',q:35},{n:'Pangapuyan ES',q:33},{n:'Panganak ES',q:200},{n:'Tigtabon ES',q:489}]},
+    {name:'Mampang ES',schools:[{n:'Mampang ES',q:488}]},
+    {name:'Arena Blanco ES',schools:[{n:'Arena Blanco East ES',q:490},{n:'Arena Blanco West ES',q:150}]},
+  ]}
+];
+
+// ── 5TH & 6TH DATA (from xlsx — double feeding quantities) ──
+// Far/priority drops marked with priority:true
+const DOUBLE_TRUCKS=[
+  {id:'t1',label:'Truck 1',route:'West Coast Route',drops:[
+    {name:'Talisayan ES',priority:true,schools:[{n:'Anuling ES',q:310},{n:'Cadalagan ES',q:464},{n:'Camp Susana ES',q:348},{n:'Datu Panguluhan ES',q:132},{n:'Pamucutan ES',q:498},{n:'Pole Diutay ES',q:148},{n:'Pole Grande ES',q:86},{n:'San Ramon ES',q:288},{n:'Talisayan ES',q:620}]},
+    {name:'Patalon ES',priority:true,schools:[{n:'Mt. View ES',q:136},{n:'Patalon ES',q:918},{n:'Montecentral ES',q:106},{n:'Sinubong ES',q:320}]},
+    {name:'Labuan CS',priority:true,schools:[{n:'Cabonegro PS',q:188},{n:'Lacumba PS',q:156},{n:'Latap ES',q:214},{n:'Labuan CS',q:2092},{n:'Limpapa ES',q:422},{n:'Campo Uno PS',q:172}]},
+    {name:'Ayala CS',schools:[{n:'Ayala Central',q:2160}]},
+    {name:'Recodo ES',schools:[{n:'Recodo ES',q:2060}]},
+    {name:'Cawit ES',schools:[{n:'Cawit ES',q:816},{n:'Baluno ES',q:220},{n:'Lima ES',q:64},{n:'Tulungatung ES',q:1142},{n:'Zambame ES',q:72}]},
+    {name:'Sinunuc ES',schools:[{n:'Cabigan ES',q:212},{n:'Maasin Learning Center',q:634},{n:'Sto. Niño ES',q:148},{n:'Sinunuc ES',q:1614}]},
+    {name:'Baliwasan CS',schools:[{n:'Capisan ES',q:232},{n:'Malagutay ES',q:454},{n:'SCC ES',q:1114},{n:'John Spirig Sr. MES',q:988},{n:'San Jose Gusu ES',q:962},{n:'Southcom ES',q:1746},{n:'Baliwasan CS',q:1048}]},
+    {name:'Sta. Maria CS',schools:[{n:'Cabatangan ES',q:516},{n:'EAAB Elem. School',q:366},{n:'Sta. Maria CS',q:1416}]},
+    {name:'Catalina Vda. de Jalon MS',schools:[{n:'Catalina Vda. de Jalon MS',q:1508}]},
+  ]},
+  {id:'t2',label:'Truck 2',route:'East Coast Route',drops:[
+    {name:'Vitali CS',priority:true,schools:[{n:'Bincul ES',q:162},{n:'Dr. Diaz MES',q:232},{n:'Linduman ES',q:194},{n:'Mangusu IS',q:252},{n:'Matiti ES',q:90},{n:'Mulawin ES',q:162},{n:'Sibuktok (Annex)',q:122},{n:'Sibuktok ES',q:270},{n:'Tagpangi ES',q:96},{n:'Sta. Fe (Annex)',q:98},{n:'Tamion ES',q:98},{n:'Taloptap ES',q:244},{n:'Tindalo ES',q:142},{n:'Vitali CS',q:538}]},
+    {name:'Tagasilay ES',priority:true,schools:[{n:'Davuy ES',q:196},{n:'Merloquet ES',q:82},{n:'Sibulao ES',q:190},{n:'Tagasilay ES',q:562},{n:'Taguiti ES',q:170},{n:'Tigbalabag ES',q:206}]},
+    {name:'Tictapul ES',priority:true,schools:[{n:'Bermuda ES',q:58},{n:'Licomo ES',q:272},{n:'Limaong ES',q:248},{n:'Malanta ES',q:108},{n:'Matarling ES',q:50},{n:'Sinoropan ES',q:200},{n:'Talaga ES',q:132},{n:'Tarlago ES',q:138},{n:'Tictapul ES',q:494},{n:'Tigui ES',q:130},{n:'Tumitus ES',q:356}]},
+    {name:'Curuan CS',priority:true,schools:[{n:'Bagacay ES',q:66},{n:'Camp Pilar ES',q:118},{n:'Cansilayan ES',q:92},{n:'Cristino Paragas MES',q:392},{n:'Curuan CS',q:768},{n:'Dita ES',q:370},{n:'Lubigan ES',q:306},{n:'Mina ES',q:172},{n:'Panubigan ES',q:196},{n:'Natividad Medalle PES',q:148},{n:'Sapa Manok ES',q:86},{n:'Sibutat ES',q:140},{n:'Upper Masaba ES',q:46}]},
+    {name:'Buenavista IS',priority:true,schools:[{n:'Buenavista IS',q:708},{n:'Calabasa ES',q:232},{n:'Latuan ES',q:128},{n:'Marangan ES',q:186},{n:'Muti ES',q:190},{n:'Niyog-Niyog ES',q:244},{n:'Sapa Dulian ES',q:108},{n:'Sapa Moro ES',q:176},{n:'Simanta ES',q:84}]},
+    {name:'Manicahan CS',schools:[{n:'Magsaysay ES',q:244},{n:'Manicahan CS',q:524},{n:'Manicahan Pob. ES',q:872},{n:'Poso ES',q:164},{n:'Victoria ES',q:598}]},
+    {name:'Sangali ES',schools:[{n:'Bolong ES',q:538},{n:'Don FOCS MES',q:182},{n:'Mangga ES',q:228},{n:'Pasilmanta ES',q:592},{n:'Sangali ES',q:2298},{n:'Siguinan ES',q:128},{n:'Sinunuk ES',q:134},{n:'Tumalutab ES',q:708}]},
+    {name:'Mercedes CS',schools:[{n:'Buenakapok ES',q:198},{n:'Imelda ES',q:140},{n:'Lanote ES',q:70},{n:'Lanzones ES',q:98},{n:'Lumbayao ES',q:86},{n:'Mercedes CS',q:1074},{n:'Mulu-Muluan ES',q:428},{n:'Pangulayan ES',q:294},{n:'Tolosa ES',q:72}]},
+    {name:'Culianan LC',schools:[{n:'Cabaluay ES',q:512},{n:'Vda Vista ES',q:120},{n:'Cacao ES',q:110},{n:'Culianan LC',q:546},{n:'Guisao ES',q:142},{n:'Islamia ES',q:208},{n:'Lapakan ES',q:120},{n:'Nangka ES',q:118}]},
+    {name:'Putik CS',schools:[{n:'Putik CS',q:1282},{n:'Divisoria ES',q:632},{n:'Lunzuran ES',q:506}]},
+    {name:'Boalan ES',schools:[{n:'Balunu ES',q:106},{n:'Boalan ES',q:1132},{n:'Lugakit ES',q:122},{n:'Lumayang ES',q:128},{n:'Lumbangan ES',q:514},{n:'Pasobolong IS',q:614},{n:'Salaan ES',q:266},{n:'Zambowood ES',q:966}]},
+  ]},
+  {id:'t3',label:'Truck 3',route:'City Route',drops:[
+    {name:'Zamboanga CS',schools:[{n:'Canelar ES',q:658},{n:'Zamboanga CS',q:1492}]},
+    {name:'Sta. Barbara CS',schools:[{n:'Mariki ES',q:802},{n:'Rio Hondo ES',q:568},{n:'Sta. Barbara CS',q:1494},{n:'Bihing Tahik PS',q:726}]},
+    {name:'DGEMS',schools:[{n:'DGEMS',q:2264}]},
+    {name:'Tugbungan ES',schools:[{n:'Tugbungan ES',q:1972}]},
+    {name:'Pasonanca ES',schools:[{n:'Bandera ES',q:104},{n:'Dulian ES',q:104},{n:'Luyahan ES',q:460},{n:'Muruk ES',q:42},{n:'Pasonanca ES',q:732},{n:'Upper Pasonanca ES',q:224}]},
+    {name:'San Roque ES',schools:[{n:'Salum ES',q:524},{n:'San Roque ES',q:1630}]},
+    {name:'Taluksangay ES',schools:[{n:'Busay ES',q:316},{n:'Landang Laum ES',q:210},{n:'Talabaan ES',q:760},{n:'Taluksangay ES',q:710},{n:'Tuan Datu HAN IS',q:520}]},
+    {name:'Bunguiao ES',schools:[{n:'Baluno ES',q:58},{n:'Bunguiao ES',q:550},{n:'Camp Socorro ES',q:78},{n:'Dulian ES',q:96},{n:'Eligna ES',q:64},{n:'Nangka ES',q:72},{n:'Sapa Seco ES',q:116},{n:'Shigeru ES',q:154},{n:'Udjung ES',q:68}]},
+    {name:'Mampang ES',schools:[{n:'Mampang ES',q:1740}]},
+    {name:'Talon-Talon CS',schools:[{n:'Talon-Talon CS',q:2852}]},
+    {name:'Arena Blanco ES',schools:[{n:'Arena Blanco East ES',q:1446},{n:'Arena Blanco West ES',q:730},{n:'Tigtabon ES',q:548},{n:'Pangapuyan ES',q:244},{n:'Landang Gua ES',q:530},{n:'Manalipa IS',q:224},{n:'Panganak ES',q:156}]},
+  ]}
+];
+
+// ── COMPUTE ──
+function computeTotals(trucks){
+  trucks.forEach(t=>{
+    t.drops.forEach(d=>{
+      d.schools.forEach(s=>{s.boxes=Math.floor(s.q/200);s.loose=s.q%200;});
+      d.total=d.schools.reduce((a,s)=>a+s.q,0);
+    });
+    t.total=t.drops.reduce((a,d)=>a+d.total,0);
+  });
+}
+computeTotals(SUMMER_TRUCKS);
+computeTotals(DOUBLE_TRUCKS);
+
+const S_DROPS=SUMMER_TRUCKS.reduce((a,t)=>a+t.drops.length,0);
+const S_GRAND=SUMMER_TRUCKS.reduce((a,t)=>a+t.total,0);
+const D_DROPS=DOUBLE_TRUCKS.reduce((a,t)=>a+t.drops.length,0);
+const D_GRAND=DOUBLE_TRUCKS.reduce((a,t)=>a+t.total,0);
+let sComp=0,dComp=0;
+
+// Update headers
+document.getElementById('s-grand-display').textContent=S_GRAND.toLocaleString()+' pcs';
+document.getElementById('d-grand-display').textContent=D_GRAND.toLocaleString()+' pcs';
+document.getElementById('s-sum-grand').textContent=S_GRAND.toLocaleString();
+document.getElementById('s-sum-grand-sub').textContent='3 trucks · '+S_DROPS+' drops';
+document.getElementById('d-sum-grand').textContent=D_GRAND.toLocaleString();
+document.getElementById('d-sum-grand-sub').textContent='3 trucks · '+D_DROPS+' drops';
+SUMMER_TRUCKS.forEach(t=>{
+  document.getElementById('s-sum-'+t.id).textContent=t.total.toLocaleString();
+  document.getElementById('s-sum-'+t.id+'-sub').textContent=t.drops.length+' drop-offs';
+});
+DOUBLE_TRUCKS.forEach(t=>{
+  document.getElementById('d-sum-'+t.id).textContent=t.total.toLocaleString();
+  document.getElementById('d-sum-'+t.id+'-sub').textContent=t.drops.length+' drop-offs';
+});
+document.getElementById('s-prog-text').textContent='0 / '+S_DROPS+' drops completed';
+document.getElementById('d-prog-text').textContent='0 / '+D_DROPS+' drops completed';
+
+// ── RENDER ──
+function renderTrucks(trucks,containerId,pfx){
+  const c=document.getElementById(containerId);
+  c.innerHTML='';
+  trucks.forEach(truck=>{
+    const block=document.createElement('div');
+    block.className='truck-block '+truck.id;
+    block.dataset.truck=truck.id;
+    const sc=truck.drops.reduce((a,d)=>a+d.schools.length,0);
+    block.innerHTML=`
+      <div class="truck-header" onclick="toggleTruck('${pfx}','${truck.id}')">
+        <div class="truck-title">🚛 ${truck.label}<span class="truck-badge">${truck.route}</span></div>
+        <div class="truck-stats">${truck.drops.length} drops · ${sc} schools<br><strong>${truck.total.toLocaleString()} pcs crackers</strong></div>
+        <div class="truck-toggle open" id="${pfx}-tog-${truck.id}">▼</div>
+      </div>
+      <div class="truck-body" id="${pfx}-body-${truck.id}"></div>`;
+    c.appendChild(block);
+    const body=block.querySelector('#'+pfx+'-body-'+truck.id);
+    truck.drops.forEach((drop,di)=>{
+      const did=`${pfx}-${truck.id}-d${di}`;
+      const div=document.createElement('div');
+      div.className='drop-block';
+      const rows=drop.schools.map((s,si)=>{
+        const rid=`row-${did}-${si}`;
+        return `<tr id="${rid}" onclick="toggleRow('${rid}')" style="cursor:pointer">
+          <td>${s.n}</td>
+          <td>${s.q===0?'—':s.q.toLocaleString()}</td>
+          <td><span class="box-badge ${s.boxes===0?'zero':''}">${s.boxes===0?'—':s.boxes+' box'+(s.boxes>1?'es':'')}</span></td>
+          <td>${s.loose===0?'—':s.loose}</td></tr>`;
+      }).join('');
+      const isPri=!!drop.priority;
+      div.innerHTML=`
+        <div class="drop-header" onclick="toggleDrop('${did}',event)">
+          <div class="drop-num">Drop ${di+1}</div>
+          <div class="drop-name">${drop.name}${isPri?'<span class="priority-badge">🔴 Priority</span>':''}</div>
+          <div class="drop-qty">${drop.total.toLocaleString()}<span class="unit">pcs</span></div>
+          <div class="drop-check" id="chk-${did}" onclick="toggleCheck('${pfx}','${did}',event)"></div>
+          <div class="drop-toggle open" id="dtog-${did}">▼</div>
+        </div>
+        <div class="school-table-wrap" id="stbl-${did}">
+          <table class="school-table">
+            <thead><tr><th>School / Recipient</th><th>Crackers (pcs)</th><th>Full Boxes</th><th>Loose</th></tr></thead>
+            <tbody>${rows}</tbody>
+            <tfoot><tr><td>Drop Total</td><td></td><td></td><td>${drop.total.toLocaleString()}</td></tr></tfoot>
+          </table>
+        </div>`;
+      body.appendChild(div);
+    });
+  });
+}
+
+renderTrucks(SUMMER_TRUCKS,'s-main-content','s');
+renderTrucks(DOUBLE_TRUCKS,'d-main-content','d');
+
+// ── INTERACTIONS ──
+function toggleTruck(pfx,tid){
+  document.getElementById(pfx+'-body-'+tid).classList.toggle('hidden');
+  document.getElementById(pfx+'-tog-'+tid).classList.toggle('open');
+}
+function toggleDrop(did,e){
+  if(e&&e.target.classList.contains('drop-check'))return;
+  document.getElementById('stbl-'+did).classList.toggle('hidden');
+  document.getElementById('dtog-'+did).classList.toggle('open');
+}
+function toggleCheck(pfx,did,e){
+  e.stopPropagation();
+  const chk=document.getElementById('chk-'+did);
+  const done=chk.classList.contains('checked');
+  if(done){chk.classList.remove('checked');chk.textContent='';if(pfx==='s')sComp=Math.max(0,sComp-1);else dComp=Math.max(0,dComp-1);}
+  else{chk.classList.add('checked');chk.textContent='✓';if(pfx==='s')sComp++;else dComp++;}
+  updateProg(pfx);
+}
+function toggleRow(rid){document.getElementById(rid).classList.toggle('done-row');}
+function updateProg(pfx){
+  if(pfx==='s'){const p=(sComp/S_DROPS)*100;document.getElementById('s-prog-fill').style.width=p+'%';document.getElementById('s-prog-text').textContent=sComp+' / '+S_DROPS+' drops completed';}
+  else{const p=(dComp/D_DROPS)*100;document.getElementById('d-prog-fill').style.width=p+'%';document.getElementById('d-prog-text').textContent=dComp+' / '+D_DROPS+' drops completed';}
+}
+function filterRoute(tab,which){
+  const pg=tab==='summer'?'page-summer':'page-double';
+  document.querySelectorAll('#'+pg+' .truck-block').forEach(el=>{
+    el.style.display=(which==='all'||el.dataset.truck===which)?'':'none';
+  });
+}
+</script>
+</body>
+</html>
